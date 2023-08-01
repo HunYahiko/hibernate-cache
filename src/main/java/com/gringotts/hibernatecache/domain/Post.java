@@ -29,9 +29,8 @@ public class Post {
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     private List<PostComment> comments = new ArrayList<>();
 
-    public Post addComment(PostComment comment) {
+    public void addComment(PostComment comment) {
         comments.add(comment);
         comment.setPost(this);
-        return this;
     }
 }

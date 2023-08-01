@@ -1,6 +1,7 @@
 package com.gringotts.hibernatecache.cacheentry;
 
 import com.gringotts.hibernatecache.AbstractTestConfiguration;
+import lombok.Data;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.junit.Test;
@@ -89,29 +90,11 @@ public class QueryCacheView extends AbstractTestConfiguration {
 
     @Entity(name = "Post_Query")
     @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Data
     public static class Post {
 
         @Id
         private Long id;
-
         private String title;
-
-        public Long getId() {
-            return id;
-        }
-
-        public Post setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Post setTitle(String title) {
-            this.title = title;
-            return this;
-        }
     }
 }

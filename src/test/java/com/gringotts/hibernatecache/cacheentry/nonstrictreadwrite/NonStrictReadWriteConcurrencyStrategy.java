@@ -1,6 +1,10 @@
 package com.gringotts.hibernatecache.cacheentry.nonstrictreadwrite;
 
 import com.gringotts.hibernatecache.AbstractTestConfiguration;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.junit.Test;
 
@@ -26,21 +30,10 @@ public class NonStrictReadWriteConcurrencyStrategy extends AbstractTestConfigura
 
     public void afterInit() {
         doInJPA(entityManager -> {
-            entityManager.persist(
-                    new Post()
-                            .setId(1L)
-                            .setTitle("Welcome to Hibernate Caching")
-                            .addComment(
-                                    new PostComment()
-                                            .setId(1L)
-                                            .setReview("This is hard")
-                            )
-                            .addComment(
-                                    new PostComment()
-                                            .setId(2L)
-                                            .setReview("This is easy")
-                            )
-            );
+            final var post = Post.builder().id(1L).title("Hibernate Caching").build();
+            post.addComment(PostComment.builder().id(1L).review("This is easy").build());
+            post.addComment(PostComment.builder().id(2L).review("This is hard").build());
+            entityManager.persist(post);
         });
         printEntityCacheRegionStatistics(Post.class);
         printEntityCacheRegionStatistics(PostComment.class);
@@ -159,6 +152,10 @@ public class NonStrictReadWriteConcurrencyStrategy extends AbstractTestConfigura
     @Entity(name = "Post_NonStrictReadWrite")
     @Table(name = "post_nonstrictreadwrite")
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Post {
 
         @Id
@@ -170,38 +167,19 @@ public class NonStrictReadWriteConcurrencyStrategy extends AbstractTestConfigura
         @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
         private List<PostComment> comments = new ArrayList<>();
 
-        public Long getId() {
-            return id;
-        }
-
-        public Post setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Post setTitle(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public List<PostComment> getComments() {
-            return comments;
-        }
-
-        public Post addComment(PostComment comment) {
+        public void addComment(PostComment comment) {
             comments.add(comment);
             comment.setPost(this);
-            return this;
         }
     }
 
     @Entity(name = "PostComment_NonStrictReadWrite")
     @Table(name = "post_comment_nonstrictreadwrite")
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class PostComment {
 
         @Id
@@ -211,32 +189,5 @@ public class NonStrictReadWriteConcurrencyStrategy extends AbstractTestConfigura
         private Post post;
 
         private String review;
-
-        public Long getId() {
-            return id;
-        }
-
-        public PostComment setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Post getPost() {
-            return post;
-        }
-
-        public PostComment setPost(Post post) {
-            this.post = post;
-            return this;
-        }
-
-        public String getReview() {
-            return review;
-        }
-
-        public PostComment setReview(String review) {
-            this.review = review;
-            return this;
-        }
     }
 }

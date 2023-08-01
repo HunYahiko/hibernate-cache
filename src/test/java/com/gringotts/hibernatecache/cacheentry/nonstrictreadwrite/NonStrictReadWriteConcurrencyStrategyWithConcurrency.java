@@ -1,6 +1,8 @@
 package com.gringotts.hibernatecache.cacheentry.nonstrictreadwrite;
 
 import com.gringotts.hibernatecache.AbstractTestConfiguration;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Interceptor;
 import org.hibernate.LockMode;
@@ -110,6 +112,8 @@ public class NonStrictReadWriteConcurrencyStrategyWithConcurrency extends Abstra
     @Entity(name = "user")
     @Table(name = "cache_user")
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    @Data
+    @NoArgsConstructor
     public static class User {
 
         @Id
@@ -121,27 +125,8 @@ public class NonStrictReadWriteConcurrencyStrategyWithConcurrency extends Abstra
         @Version
         private short version;
 
-        public User() {
-        }
-
         public User(String name) {
             this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
         }
 
         @Override

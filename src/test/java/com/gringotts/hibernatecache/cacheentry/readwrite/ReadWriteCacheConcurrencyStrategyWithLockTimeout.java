@@ -2,6 +2,8 @@ package com.gringotts.hibernatecache.cacheentry.readwrite;
 
 import com.gringotts.hibernatecache.AbstractTestConfiguration;
 import com.gringotts.hibernatecache.ReflectionUtils;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.ehcache.core.Ehcache;
 import org.hibernate.EmptyInterceptor;
@@ -72,7 +74,6 @@ public class ReadWriteCacheConcurrencyStrategyWithLockTimeout extends AbstractTe
     }
 
     @Test
-//    @Ignore("Check the timeout property in latest EhCache version")
     public void testRepositoryEntityUpdate() {
         try {
             doInJPA(entityManager -> {
@@ -122,7 +123,7 @@ public class ReadWriteCacheConcurrencyStrategyWithLockTimeout extends AbstractTe
         return (T) getCache(clazz).get(cacheKey(id, entityPersister));
     }
 
-    private Ehcache getCache(Class clazz) throws IllegalAccessException {
+    private Ehcache getCache(Class clazz) {
         SessionFactory sessionFactory = sessionFactory();
         Statistics statistics = sessionFactory.getStatistics();
         if (sessionFactory.getSessionFactoryOptions().isQueryCacheEnabled()) {
@@ -144,6 +145,8 @@ public class ReadWriteCacheConcurrencyStrategyWithLockTimeout extends AbstractTe
 
     @Entity(name = "repository")
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Data
+    @NoArgsConstructor
     public static class Repository {
 
         @Id
@@ -155,27 +158,8 @@ public class ReadWriteCacheConcurrencyStrategyWithLockTimeout extends AbstractTe
         @Version
         private int version;
 
-        public Repository() {
-        }
-
         public Repository(String name) {
             this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
         }
     }
 }

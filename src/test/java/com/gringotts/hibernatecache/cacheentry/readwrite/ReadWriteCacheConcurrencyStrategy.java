@@ -1,6 +1,10 @@
 package com.gringotts.hibernatecache.cacheentry.readwrite;
 
 import com.gringotts.hibernatecache.AbstractTestConfiguration;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.junit.Test;
 
@@ -21,7 +25,7 @@ public class ReadWriteCacheConcurrencyStrategy extends AbstractTestConfiguration
 
     @Override
     protected Class<?>[] entities() {
-        return new Class<?>[] {
+        return new Class<?>[]{
                 Post.class,
                 PostComment.class
         };
@@ -29,21 +33,12 @@ public class ReadWriteCacheConcurrencyStrategy extends AbstractTestConfiguration
 
     public void afterInit() {
         doInJPA(entityManager -> {
-            entityManager.persist(
-                    new Post()
-                            .setId(1L)
-                            .setTitle("Welcome to Hibernate Cache")
-                            .addComment(
-                                    new PostComment()
-                                            .setId(1L)
-                                            .setReview("This is easy")
-                            )
-                            .addComment(
-                                    new PostComment()
-                                            .setId(2L)
-                                            .setReview("This is hard")
-                            )
-            );
+            final Post post = Post.builder()
+                                  .id(1L)
+                                  .title("Welcome to Hibernate Cache").build();
+            post.addComment(PostComment.builder().id(1L).review("This is easy").build());
+            post.addComment(PostComment.builder().id(2L).review("This is hard").build());
+            entityManager.persist(post);
         });
         printEntityCacheRegionStatistics(Post.class);
         printEntityCacheRegionStatistics(PostComment.class);
@@ -153,6 +148,10 @@ public class ReadWriteCacheConcurrencyStrategy extends AbstractTestConfiguration
     @Entity(name = "Post_ReadWrite")
     @Table(name = "post_readwrite")
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Post {
 
         @Id
@@ -164,38 +163,19 @@ public class ReadWriteCacheConcurrencyStrategy extends AbstractTestConfiguration
         @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
         private List<PostComment> comments = new ArrayList<>();
 
-        public Long getId() {
-            return id;
-        }
-
-        public Post setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Post setTitle(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public List<PostComment> getComments() {
-            return comments;
-        }
-
-        public Post addComment(PostComment comment) {
+        public void addComment(PostComment comment) {
             comments.add(comment);
             comment.setPost(this);
-            return this;
         }
     }
 
     @Entity(name = "PostComment_ReadWrite")
     @Table(name = "post_comment_readwrite")
     @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class PostComment {
 
         @Id
@@ -205,32 +185,5 @@ public class ReadWriteCacheConcurrencyStrategy extends AbstractTestConfiguration
         private Post post;
 
         private String review;
-
-        public Long getId() {
-            return id;
-        }
-
-        public PostComment setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Post getPost() {
-            return post;
-        }
-
-        public PostComment setPost(Post post) {
-            this.post = post;
-            return this;
-        }
-
-        public String getReview() {
-            return review;
-        }
-
-        public PostComment setReview(String review) {
-            this.review = review;
-            return this;
-        }
     }
 }

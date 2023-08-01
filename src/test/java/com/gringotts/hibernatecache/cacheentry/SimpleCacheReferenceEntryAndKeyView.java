@@ -1,6 +1,10 @@
 package com.gringotts.hibernatecache.cacheentry;
 
 import com.gringotts.hibernatecache.AbstractTestConfiguration;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Immutable;
@@ -27,9 +31,10 @@ public class SimpleCacheReferenceEntryAndKeyView extends AbstractTestConfigurati
     @Test
     public void simpleCacheReferenceView() {
         doInJPA(entityManager -> entityManager.persist(
-                new Post()
-                        .setId(1L)
-                        .setTitle("Welcome to Hibernate Caching")
+                Post.builder()
+                        .id(1L)
+                        .title("Welcome to Hibernate Caching")
+                        .build()
         ));
 
         doInJPA(entityManager -> {
@@ -48,29 +53,15 @@ public class SimpleCacheReferenceEntryAndKeyView extends AbstractTestConfigurati
     @Entity(name = "Post_CacheEntry")
     @Immutable
     @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Post {
 
         @Id
         private Long id;
 
         private String title;
-
-        public Long getId() {
-            return id;
-        }
-
-        public Post setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public Post setTitle(String title) {
-            this.title = title;
-            return this;
-        }
     }
 }

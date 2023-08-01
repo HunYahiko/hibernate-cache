@@ -398,26 +398,4 @@ public abstract class AbstractTestConfiguration {
             throw new RuntimeException(e);
         }
     }
-
-    protected void executeAsync(Runnable callable, final Runnable completionCallback) {
-        final Future future = executorService.submit(callable);
-        new Thread(() -> {
-            while (!future.isDone()) {
-                try {
-                    Thread.sleep(100);
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            }
-            try {
-                completionCallback.run();
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }).start();
-    }
-
-    protected Future<?> executeAsync(Runnable callable) {
-        return executorService.submit(callable);
-    }
 }
