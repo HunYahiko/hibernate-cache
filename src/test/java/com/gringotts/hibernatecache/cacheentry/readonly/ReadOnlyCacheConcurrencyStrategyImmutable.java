@@ -88,6 +88,19 @@ public class ReadOnlyCacheConcurrencyStrategyImmutable extends AbstractTestConfi
 
         try {
             doInJPA(entityManager -> {
+                LOGGER.info("Try to change a cached comment");
+                Post post = entityManager.find(Post.class, 1L);
+                PostComment comment = post.getComments().get(0);
+                comment.setReview("This is a new review");
+            });
+        } catch (Exception e) {
+            LOGGER.error("Expected", e);
+        }
+
+        printEntityCacheRegionStatistics(PostComment.class);
+
+        try {
+            doInJPA(entityManager -> {
                 Post post = entityManager.find(Post.class, 1L);
                 PostComment comment = post.getComments().remove(0);
                 comment.setPost(null);
@@ -117,6 +130,7 @@ public class ReadOnlyCacheConcurrencyStrategyImmutable extends AbstractTestConfi
         @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "post")
         @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
         @Immutable
+        @Builder.Default
         private List<PostComment> comments = new ArrayList<>();
 
         public void addComment(PostComment comment) {

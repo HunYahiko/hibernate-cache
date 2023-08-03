@@ -54,7 +54,6 @@ public class OneToManyRelationshipEntryView extends AbstractTestConfiguration {
 
         printCacheRegionStatistics(Post.class.getName());
         printCacheRegionStatistics(PostComment.class.getName());
-        printCollectionCacheRegionStatistics(Post.class, "comments");
         // Count how many hits were on post comments + explanation + solution
         // Count how many hits were on post's comments when cached + explanation + solution
     }

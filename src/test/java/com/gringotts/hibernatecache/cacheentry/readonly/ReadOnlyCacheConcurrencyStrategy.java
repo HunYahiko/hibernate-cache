@@ -108,6 +108,17 @@ public class ReadOnlyCacheConcurrencyStrategy extends AbstractTestConfiguration 
         } catch (Exception e) {
             LOGGER.error("Expected", e);
         }
+
+        try {
+            doInJPA(entityManager -> {
+                LOGGER.info("Try to change a cached comment");
+                Post post = entityManager.find(Post.class, 1L);
+                PostComment comment = post.getComments().get(0);
+                comment.setReview("This is a new review");
+            });
+        } catch (Exception e) {
+            LOGGER.error("Expected", e);
+        }
     }
 
     @Test
@@ -168,6 +179,7 @@ public class ReadOnlyCacheConcurrencyStrategy extends AbstractTestConfiguration 
         @OneToMany(mappedBy = "post",
                 cascade = CascadeType.ALL, orphanRemoval = true)
         @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+        @Builder.Default
         private List<PostComment> comments = new ArrayList<>();
 
         public void addComment(PostComment comment) {

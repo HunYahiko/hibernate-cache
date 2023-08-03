@@ -161,6 +161,7 @@ public class ReadWriteCacheConcurrencyStrategy extends AbstractTestConfiguration
 
         @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
         @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+        @Builder.Default
         private List<PostComment> comments = new ArrayList<>();
 
         public void addComment(PostComment comment) {

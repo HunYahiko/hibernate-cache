@@ -45,11 +45,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -68,6 +69,12 @@ public abstract class AbstractTestConfiguration {
         Thread bob = new Thread(r);
         bob.setName("Second-Thread");
         return bob;
+    });
+
+    protected final ScheduledExecutorService anotherExecutorService = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread jason = new Thread(r);
+        jason.setName("Third-Thread");
+        return jason;
     });
 
     protected EntityManagerFactory entityManagerFactory;
@@ -380,14 +387,6 @@ public abstract class AbstractTestConfiguration {
         executeSync(Collections.singleton(callable));
     }
 
-    protected <T> T executeSync(Callable<T> callable) {
-        try {
-            return executorService.submit(callable).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     protected void executeSync(Collection<VoidCallable> callables) {
         try {
             List<Future<Void>> futures = executorService.invokeAll(callables);
@@ -397,5 +396,18 @@ public abstract class AbstractTestConfiguration {
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected void executeSyncInAnotherThread(VoidCallable callable) {
+        try {
+            Future<Void> future = anotherExecutorService.schedule(callable, 3, TimeUnit.SECONDS);
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected Future<?> executeAsync(Runnable callable) {
+        return anotherExecutorService.schedule(callable, 0, TimeUnit.SECONDS);
     }
 }

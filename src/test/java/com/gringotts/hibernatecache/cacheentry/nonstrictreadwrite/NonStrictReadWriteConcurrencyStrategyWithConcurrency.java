@@ -10,6 +10,7 @@ import org.hibernate.LockOptions;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.persistence.Entity;
@@ -55,6 +56,15 @@ public class NonStrictReadWriteConcurrencyStrategyWithConcurrency extends Abstra
                     _entityManager.close();
                     endLatch.countDown();
                 });
+                executeAsync(() -> {
+                    EntityManager entityManager = entityManagerFactory().createEntityManager();
+                    User userTwo =
+                            entityManager.find(User.class, 1L);
+                    LOGGER.info("Cached User from with thirdThread's transaction {}",
+                                userTwo);
+                    printEntityCacheRegionStatistics(User.class);
+                    entityManager.close();
+                });
                 assertTrue(sessionFactory().getCache()
                                            .containsEntity(User.class, 1L));
             }
@@ -86,6 +96,7 @@ public class NonStrictReadWriteConcurrencyStrategyWithConcurrency extends Abstra
             applyInterceptor.set(true);
         });
         endLatch.await();
+        printEntityCacheRegionStatistics(User.class);
         assertFalse(sessionFactory().getCache()
                                     .containsEntity(User.class, 1L));
         doInJPA(entityManager -> {
@@ -93,19 +104,23 @@ public class NonStrictReadWriteConcurrencyStrategyWithConcurrency extends Abstra
             User user = entityManager.find(User.class, 1L);
             LOGGER.info("Cached User {}", user);
         });
+        Thread.sleep(1000);
     }
 
     @Test
+    @Ignore("The only thing that changes is that the first transaction updates the version")
     public void userOptimisticLocking() {
         LOGGER.info("userOptimisticLocking");
         doInJPA(entityManager -> {
             LOGGER.info("Load User");
             User user = entityManager.find(User.class, 1L);
             entityManager.unwrap(Session.class).buildLockRequest(new LockOptions().setLockMode(LockMode.OPTIMISTIC)).lock(user);
+            user.setName("Duh");
         });
         doInJPA(entityManager -> {
             LOGGER.info("Load User again");
             entityManager.find(User.class, 1L);
+            printEntityCacheRegionStatistics(User.class);
         });
     }
 

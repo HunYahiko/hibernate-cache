@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Immutable;
 import org.junit.Test;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.io.Serializable;
 import java.util.Properties;
 
 import static org.junit.Assert.assertNotNull;
@@ -51,13 +51,12 @@ public class SimpleCacheReferenceEntryAndKeyView extends AbstractTestConfigurati
     }
 
     @Entity(name = "Post_CacheEntry")
-    @Immutable
-    @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Post {
+    public static class Post implements Serializable {
 
         @Id
         private Long id;

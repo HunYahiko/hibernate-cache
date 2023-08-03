@@ -165,6 +165,7 @@ public class NonStrictReadWriteConcurrencyStrategy extends AbstractTestConfigura
 
         @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
         @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+        @Builder.Default
         private List<PostComment> comments = new ArrayList<>();
 
         public void addComment(PostComment comment) {

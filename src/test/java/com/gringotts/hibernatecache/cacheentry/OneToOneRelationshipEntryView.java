@@ -30,7 +30,7 @@ public class OneToOneRelationshipEntryView extends AbstractTestConfiguration {
         doInJPA(entityManager -> {
             entityManager.find(Post.class, 1L);
             final PostDetail postDetail = entityManager.find(PostDetail.class, 1L);
-            postDetail.getPost().getTitle();
+            postDetail.getPost();
         });
 
         // Count the cache hits on post + explanation + solution
